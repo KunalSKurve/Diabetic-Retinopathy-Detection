@@ -1,4 +1,4 @@
-# DiabeticRetinopathyDetection
+# Diabetic Retinopathy Detection
 
 Detection of Diabetic Retinopathy (DR) in early stage
 is essential to avoid complete blindness. The retinal fundus
