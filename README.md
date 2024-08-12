@@ -1,4 +1,4 @@
-# Diabetic Retinopathy Detection - for Subject: Data Science
+# Diabetic Retinopathy Detection - for Subject: Data Science (Diabetic-Retinopathy-Detection_SY_S1_Data_Science)
 
 Detection of Diabetic Retinopathy (DR) in early stage
 is essential to avoid complete blindness. The retinal fundus
