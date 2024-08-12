@@ -1,0 +1,181 @@
+---
+title: "R Notebook on Diabetes Prediction by Group 4 Batch B1"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(readxl)
+diabetes <- read_excel("C:/Users/shashankkurve/Desktop/SY/DataScience/LaboratoryWithShitalSobaleMam/CourseProject-DiabeticRetinopathyDetection/diabetes.xlsx")
+View(diabetes)
+df<-diabetes
+df
+summary(df)
+```
+
+
+```{r}
+#Naive Bayes
+
+str(df)
+library(caTools)
+sampleSplit<-sample.split(df, SplitRatio = 0.75)
+df_train<-subset(df, sampleSplit==TRUE)
+df_test<-subset(df,sampleSplit==FALSE)
+
+# Applying Naive Bayes Classifier
+
+#install.packages("e1071")
+library(e1071)
+Naive_classifier<-naiveBayes(x = diabetes_train[,1:4],y=diabetes_train$Outcome)
+
+#predicting the Test set results
+y_pred <- predict(Naive_classifier,newdata = diabetes_test[,1:4])
+head(y_pred)
+con_matrix<-table(Actual=diabetes_test[,5],Predicted=y_pred)
+con_matrix
+
+#Accuracy
+accuracy_naive<-sum(diag(con_matrix))/sum(con_matrix)*100
+accuracy_naive
+```
+
+
+```{r}
+# Using Decision Tree Classifier
+
+str(df)
+library(caTools)
+set.seed(123)
+sampleSplit<-sample.split(df,SplitRatio=0.8)
+df_train<-subset(df, sampleSplit==TRUE)
+df_test<-subset(df, sampleSplit==FALSE)
+
+# Applying Decision tree
+
+#install.packages("rpart")
+library(rpart)
+decision_classifier<-rpart(Outcome~.,data = diabetes_train)
+
+#Predicting the test results
+decision_pred<-predict(decision_classifier, newdata = diabetes_test[,1:4], type='class')
+con_matrix<-table(Actual=diabetes_test[,5],Predicted=decision_pred)
+con_matrix
+
+#Accuracy
+accuracy_decision<-sum(diag(con_matrix))/sum(con_matrix)*100
+accuracy_decision
+
+#plot
+plot(decision_classifier)
+text(decision_classifier)
+```
+
+
+```{r}
+# Using KNN Classifier
+
+install.packages("class")
+library(class)
+library(caTools)
+sampleSplit<-sample.split(diabetes,SplitRatio = 0.8)
+diabetes_train<-subset(diabetes,sampleSplit==TRUE)
+diabetes_test<-subset(diabetes,sampleSplit==FALSE)
+
+# Applying K-Nearest Neighbor 
+
+knn_classifier<-knn(train=diabetes_train[,1:4],test=diabetes_test[,1:4],cl=diabetes_train$Outcome,k=1)
+con_matrix<-table(predicted=knn_classifier,actual=diabetes_test[,5])
+con_matrix
+
+accuracy=sum(diag(con_matrix))/sum(con_matrix)*100
+accuracy
+```
+
+
+```{r}
+# Using Logistic Regression
+
+#install.packages("mlbench")
+library(mlbench)
+
+str(df)
+
+#Visualization
+installed.packages("ggplot2")
+library(ggplot2)
+ggplot(aes(x=SkinThickness, y=Outcome),data=df)+
+  geom_point()
+
+ggplot(aes(x=SkinThickness, y=Outcome), data = df)+
+  geom_jitter(height = 0.05, width = 0.3, alpha=0.4)
+
+df$SkinThickness_numeric=as.numeric(as.character(df$SkinThickness))
+View(df)
+df$Outcome_numeric=ifelse(df$Outcome=="0")
+str(df)
+
+#logistic Regression using ggplot2
+ggplot(aes(x=SkinThickness_numeric,y=Outcome_numeric),data=df)+
+  geom_jitter(height = 0.05,width=0.3,alpha=0.4)+
+  geom_smooth(method = "glm",method.args=list(family="binomial"))
+
+#summary of logistic regression
+log_regressor<-glm(Outcome_numeric~SkinThickness_numeric,family = "binomial", data=df)
+summary(log_regressor)
+
+#Prediction
+df$prob<-predict(log_regressor,type = "response")
+head(df$prob)
+df$glm_pred<-ifelse(df$prob>0.5,"1","0")
+
+#Confusion Matrix
+Con_Matrix<-table(Predicted=df$glm_pred,Actual=df$Outcome)
+Con_Matrix
+
+#Accuracy
+Accuracy=sum(diag(Con_Matrix))/sum(Con_Matrix)*100
+Accuracy
+```
+
+
+```{r}
+# Using Polynomial Regression Model
+
+library(ISLR)
+head(diabetes)
+str(diabetes)
+attach(diabetes)
+plot(Age,Outcome)
+
+#linear fit
+l_model<-lm(Outcome~Age)
+abline(l_model, col='red')
+summary(l_model)
+
+#polynomial fit degree 2
+p_model<-lm(Outcome~Age+I(Age^2))
+summary(p_model)
+
+#polynomial fit of degree 4
+p_model2<- lm(Outcome~Age+I(Age^2)+I(Age^3)+I(Age^4))
+summary(p_model2)
+abline(p_model2, col='red')
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
